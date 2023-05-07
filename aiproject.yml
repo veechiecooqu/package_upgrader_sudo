@@ -1,0 +1,34 @@
+name: package_upgrader
+binaries:
+  - upgr
+steps:
+  - function:
+      name: upgr
+      description: "Upgrades all packages"
+      steps:
+        - print_message:
+            text: "Updating packages, please wait..."
+            color: auto
+        - can_update_mirrors_check:
+            mirrorlist_path: "/etc/pacman.d/mirrorlist"
+        - update_with_fastest_mirrors:
+            condition: can_update_mirrors_check
+            steps:
+              - print_message:
+                  text: "Fetching fastest mirrors, please wait..."
+                  color: yellow
+              - execute_command:
+                  command: "doas cp -b --no-preserve=mode,ownership rate-mirrors arch --fetch-mirrors-timeout 300000 | psub /etc/pacman.d/mirrorlist"
+                  success:
+                    - print_message:
+                        text: "Using fastest mirrors."
+                        color: green
+                  failure:
+                    - print_message:
+                        text: "Fetch failed. Using previously fetched mirrors."
+                        color: red
+        - upgrade_packages:
+            - paru:
+                command: "paru"
+            - fisher_update:
+                command: "fish -c 'fisher update'"
