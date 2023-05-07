@@ -18,14 +18,24 @@ steps:
                   text: "Fetching fastest mirrors, please wait..."
                   color: yellow
               - execute_command:
-                  command: "doas cp -b --no-preserve=mode,ownership rate-mirrors arch --fetch-mirrors-timeout 300000 | psub /etc/pacman.d/mirrorlist"
+                  command: "rate-mirrors arch --fetch-mirrors-timeout 300000"
+                  output: "fastest_mirrors_temp_file"
+              - write_output_to_temp_file:
+                  output: "fastest_mirrors_temp_file"
+              - execute_command:
+                  command: "doas chown root:root fastest_mirrors_temp_file"
                   success:
-                    - print_message:
-                        text: "Using fastest mirrors."
-                        color: green
+                    - copy_temp_file_to_destination:
+                        src: "fastest_mirrors_temp_file"
+                        dest: "/etc/pacman.d/mirrorlist"
+                        steps:
+                          - execute_command:
+                              command: "doas cp fastest_mirrors_temp_file /etc/pacman.d/mirrorlist"
+                          - execute_command:
+                              command: "doas chmod 644 /etc/pacman.d/mirrorlist"
                   failure:
                     - print_message:
-                        text: "Fetch failed. Using previously fetched mirrors."
+                        text: "Failed to change ownership of temporary file. Cannot update mirrorlist."
                         color: red
         - upgrade_packages:
             - paru:
