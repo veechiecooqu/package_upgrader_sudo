@@ -1,6 +1,6 @@
 [package]
 name = "package_upgrader"
-version = "0.1.0"
+version = "0.1.2"
 edition = "2021"
 authors = ["Nitesh Debnath <30214255+veechiecooqu@users.noreply.github.com>"]
 license = "Unlicense"
