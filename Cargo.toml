@@ -10,6 +10,7 @@ license = "Unlicense"
 [dependencies]
 chrono = "0.4"
 tempfile = "3.5"
+logind-dbus = "0.1.1"
 
 [[bin]]
 name = "upgr"
