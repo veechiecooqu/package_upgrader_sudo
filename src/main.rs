@@ -1,3 +1,4 @@
+use chrono::Utc;
 use logind_dbus::LoginManager;
 mod updater;
 
@@ -22,7 +23,7 @@ fn main() {
         let last_modified = metadata.modified().unwrap();
 
         let duration_since_modified =
-            chrono::Utc::now().signed_duration_since::<chrono::Utc>(last_modified.into());
+            Utc::now().signed_duration_since::<Utc>(chrono::DateTime::from(last_modified));
 
         duration_since_modified > chrono::Duration::days(1)
     };
