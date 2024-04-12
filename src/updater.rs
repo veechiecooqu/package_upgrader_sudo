@@ -9,20 +9,20 @@ use tempfile::NamedTempFile;
 
 
 fn copy_with_privilege(src: &Path, dest: &Path) -> std::io::Result<()> {
-    let status = Command::new("doas")
+    let status = Command::new("sudo")
         .args(["cp", src.to_str().unwrap(), dest.to_str().unwrap()])
         .status()
-        .map_err(|_e| Error::new(ErrorKind::Other, "Failed to execute doas command"))?;
+        .map_err(|_e| Error::new(ErrorKind::Other, "Failed to execute sudo command"))?;
 
     if status.success() {
         // Set the file permissions to -rw-r--r--
-        let chmod_status = Command::new("doas")
+        let chmod_status = Command::new("sudo")
             .args(["chmod", "644", dest.to_str().unwrap()])
             .status()
             .map_err(|e| {
                 Error::new(
                     ErrorKind::Other,
-                    format!("Failed to execute doas chmod command: {}", e),
+                    format!("Failed to execute sudo chmod command: {}", e),
                 )
             })?;
 
@@ -56,7 +56,7 @@ pub fn update_with_fastest_mirrors() {
 
     let temp_path = temp_file.path();
 
-    let status = Command::new("doas")
+    let status = Command::new("sudo")
         .args(["chown", "root:root", temp_path.to_str().unwrap()])
         .status()
         .expect("Failed to change ownership of temporary file");
