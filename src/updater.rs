@@ -1,12 +1,9 @@
-
-
 use std::io::{Error, ErrorKind, Write};
 
 use std::path::Path;
 
 use std::process::{Command, Stdio};
 use tempfile::NamedTempFile;
-
 
 fn copy_with_privilege(src: &Path, dest: &Path) -> std::io::Result<()> {
     let status = Command::new("sudo")
@@ -77,9 +74,9 @@ pub fn upgrade_packages() {
         .status()
         .expect("Failed to execute paru");
 
-    Command::new("fish")
-        .args(["-c", "fisher update"])
+    Command::new("flatpak")
+        .args(["update", "--user"])
         .stdout(Stdio::inherit())
         .status()
-        .expect("Failed to execute fisher update");
+        .expect("Failed to execute flatpak update");
 }

@@ -1,15 +1,25 @@
 use chrono::Utc;
-use logind_dbus::LoginManager;
+use logind_zbus::manager::{InhibitType, ManagerProxyBlocking};
 mod updater;
 
 fn main() {
     // Step 1: Print message
     println!("Updating packages, please wait...");
-    let mut suspend_lock = Err("Did not work");
-    if let Ok(login_manager) = LoginManager::new() {
-        suspend_lock = Ok(login_manager
-            .connect()
-            .inhibit_suspend("Package Upgrader", "Prevents sleep during upgrade"));
+
+    // This makes the suspend_lock live as long as main
+    let mut suspend_lock = Err(::zbus::Error::MissingField);
+    // Step 1: Grab a system connection (I will never do async) because inhibitors live in system
+    if let Ok(conn) = ::zbus::blocking::Connection::system() {
+        // Step 2: Grab a manager proxy
+        if let Ok(manager_proxy) = ManagerProxyBlocking::new(&conn) {
+            // Step 3: Finally get your suspend inhibitors.
+            suspend_lock = manager_proxy.inhibit(
+                InhibitType::Sleep,
+                "Package Upgrader",
+                "Prevents sleep during upgrade",
+                "delay",
+            );
+        }
     }
     if suspend_lock.is_ok() {
         println!("Idle inhibit ready");
@@ -27,7 +37,6 @@ fn main() {
 
         duration_since_modified > chrono::Duration::days(1)
     };
-
     // Run Step 2 only if the condition is met
     if can_update {
         updater::update_with_fastest_mirrors();
