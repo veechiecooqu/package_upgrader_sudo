@@ -6,8 +6,9 @@ fn main() {
     // Step 1: Print message
     println!("Updating packages, please wait...");
 
-    // This makes the suspend_lock live as long as main
-    let mut suspend_lock = Err(::zbus::Error::MissingField);
+    // This makes the suspend_lock live as long as main, and gives a nice generic error if this
+    // fails to assign
+    let mut suspend_lock = Err(::zbus::Error::Failure("Not initialized yet!".to_owned()));
     // Step 1: Grab a system connection (I will never do async) because inhibitors live in system
     if let Ok(conn) = ::zbus::blocking::Connection::system() {
         // Step 2: Grab a manager proxy
